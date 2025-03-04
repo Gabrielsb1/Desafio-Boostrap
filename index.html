@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Pedidos - McDonald's</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --mc-red: #DA291C;
+            --mc-yellow: #FFC72C;
+            --mc-dark: #27251F;
+        }
+        
+        .mc-bg-red { background-color: var(--mc-red) !important; }
+        .mc-text-yellow { color: var(--mc-yellow) !important; }
+        .mc-btn-primary {
+            background-color: var(--mc-red);
+            border-color: var(--mc-red);
+            color: white;
+        }
+        .mc-btn-primary:hover {
+            background-color: #c8231a;
+            border-color: #bd1f17;
+        }
+        .nav-link.active {
+            border-bottom: 3px solid var(--mc-yellow);
+        }
+        .menu-card {
+            transition: transform 0.2s;
+            cursor: pointer;
+        }
+        .menu-card:hover {
+            transform: translateY(-5px);
+        }
+    </style>
+</head>
+<body class="bg-light">
+
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark mc-bg-red fixed-top">
+    <div class="container">
+        <a class="navbar-brand d-flex align-items-center" href="#">
+            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/3/36/McDonald%27s_Golden_Arches.svg/1200px-McDonald%27s_Golden_Arches.svg.png" 
+                 alt="McDonald's Logo" width="40" class="me-2">
+            <span class="mc-text-yellow fw-bold">McDonald's</span>
+        </a>
+        
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#pedidos">Pedidos</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown">
+                        Ajuda
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#">Contato</a></li>
+                        <li><a class="dropdown-item" href="#">FAQ</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<!-- Alertas Dinâmico -->
+<div class="toast-container position-fixed top-20 end-0 p-3">
+    <div id="liveToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true">
+        <div class="toast-header mc-bg-red text-white">
+            <strong class="me-auto">Notificação</strong>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body"></div>
+    </div>
+</div>
+
+<main class="container mt-5 pt-5">
+    <div class="row g-4">
+        <!-- Tabela de Pedidos  -->
+        <div class="col-lg-7">
+            <div class="card shadow-sm">
+                <div class="card-header mc-bg-red text-white">
+                    <h3 class="mb-0">Seu Pedido</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th class="text-center">Quantidade</th>
+                                    <th class="text-end">Preço</th>
+                                    <th class="text-end">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="pedidoItems">
+                                <!-- Itens serão inseridos via JS -->
+                            </tbody>
+                            <tfoot class="table-group-divider">
+                                <tr>
+                                    <td colspan="2" class="fw-bold text-end">Total:</td>
+                                    <td colspan="2" class="text-end fw-bold" id="totalPedido">$0.00</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Formulário do projeto -->
+        <div class="col-lg-5">
+            <div class="card shadow-sm">
+                <div class="card-header mc-bg-red text-white">
+                    <h3 class="mb-0">Monte Seu Pedido</h3>
+                </div>
+                <div class="card-body">
+                    <form id="pedidoForm">
+                        <!-- Seleção de Produto -->
+                        <div class="form-floating mb-4">
+                            <select class="form-select" id="produto" required>
+                                <option value="" selected>Selecione um item</option>
+                                <option value="Big Mac">Big Mac - R$ 36,00</option>
+                                <option value="McNuggets">McNuggets (10un) - R$ 26,00</option>
+                                <option value="McFritas">McFritas Média - R$ 18,00</option>
+                                <option value="DuploQuar">Duplo Quarterão - R$ 40,00</option>
+                            </select>
+                            <label for="produto">Item do Cardápio</label>
+                        </div>
+
+                        <!-- Personalização -->
+                        <div class="mb-4">
+                            <label class="form-label fw-bold">Personalizar:</label>
+                            
+                            <div class="form-floating mb-3">
+                                <input type="number" class="form-control" id="quantidade" 
+                                       min="1" value="1" required>
+                                <label for="quantidade">Quantidade</label>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Tamanho do Combo:</label>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="tamanho" 
+                                           id="pequeno" value="0" autocomplete="off" checked>
+                                    <label class="btn btn-outline-danger" for="pequeno">Pequeno</label>
+
+                                    <input type="radio" class="btn-check" name="tamanho" 
+                                           id="medio" value="2" autocomplete="off">
+                                    <label class="btn btn-outline-danger" for="medio">Médio (+R$ 4,00)</label>
+
+                                    <input type="radio" class="btn-check" name="tamanho" 
+                                           id="grande" value="3" autocomplete="off">
+                                    <label class="btn btn-outline-danger" for="grande">Grande (+R$ 8,00)</label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Adicionais:</label>
+                                <div class="row g-2">
+                                    <div class="col-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" 
+                                                   id="queijo" value="1.5">
+                                            <label class="form-check-label" for="queijo">
+                                                Queijo Extra (+R$ 3,00)
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-6">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" 
+                                                   id="bacon" value="2">
+                                            <label class="form-check-label" for="bacon">
+                                                Bacon (+R$ 5,00)
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-check mb-4">
+                            <input class="form-check-input" type="checkbox" 
+                                   id="confirmar" required>
+                            <label class="form-check-label" for="confirmar">
+                                Confirmo que meus dados estão corretos
+                            </label>
+                        </div>
+
+                        <button type="submit" class="btn mc-btn-primary w-100 py-3">
+                            <i class="bi bi-cart-check"></i> Adicionar ao Pedido
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Alerta de geração do pedido -->
+<div class="modal fade" id="confirmacaoModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header mc-bg-red text-white">
+                <h5 class="modal-title">Confirmação de Pedido</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-success">
+                    <h6 class="alert-heading">Pedido realizado com sucesso!</h6>
+                    <hr>
+                    <p class="mb-0">Tempo estimado de entrega: <strong>25-40 minutos</strong></p>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <tbody id="modalPedidoDetails"></tbody>
+                    </table>
+                </div>
+                <div class="text-end h5">
+                    Total: <span class="text-success" id="modalTotal">$0.00</span>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Variavel de ppreços
+    const cardapio = {
+        'Big Mac': 36.00,
+        'McNuggets': 26.00,
+        'McFritas': 18.00,
+        'DuploQuar': 40.00
+    };
+
+    // variavel do pedidos
+    let pedido = {
+        items: [],
+        total: 0
+    };
+
+    // Contolador
+    const toast = new bootstrap.Toast(document.getElementById('liveToast'));
+
+    function showToast(message, type = 'success') {
+        const toastBody = document.querySelector('.toast-body');
+        toastBody.innerHTML = message;
+        document.querySelector('#liveToast .toast-header').className = 
+            `toast-header mc-bg-red text-white ${type === 'error' ? 'bg-danger' : ''}`;
+        toast.show();
+    }
+
+    // Atualizar Total
+    function updateTotal() {
+        pedido.total = pedido.items.reduce((acc, item) => acc + item.total, 0);
+        document.getElementById('totalPedido').textContent = 
+            `$${pedido.total.toFixed(2)}`;
+        document.getElementById('modalTotal').textContent = 
+            `$${pedido.total.toFixed(2)}`;
+    }
+
+    // Adicionar item 
+    function addItemToOrder(item) {
+        const existingItem = pedido.items.find(i => i.nome === item.nome);
+        if (existingItem) {
+            existingItem.quantidade += item.quantidade;
+            existingItem.total += item.total;
+        } else {
+            pedido.items.push(item);
+        }
+        
+        updateTotal();
+        renderOrderItems();
+    }
+
+    // Mostrar items na tabela
+    function renderOrderItems() {
+        const tbody = document.getElementById('pedidoItems');
+        tbody.innerHTML = pedido.items.map(item => `
+            <tr>
+                <td>${item.nome}</td>
+                <td class="text-center">${item.quantidade}</td>
+                <td class="text-end">$${item.total.toFixed(2)}</td>
+                <td class="text-end">
+                    <button class="btn btn-sm btn-danger" onclick="removeItem('${item.nome}')">
+                        Remover
+                    </button>
+                </td>
+            </tr>
+        `).join('');
+    }
+
+    // Remover itens da tabela
+    function removeItem(itemName) {
+        pedido.items = pedido.items.filter(item => item.nome !== itemName);
+        updateTotal();
+        renderOrderItems();
+        showToast('Item removido com sucesso!');
+    }
+
+    // Manipulador de formulário
+    document.getElementById('pedidoForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const produto = document.getElementById('produto').value.split(' - ')[0];
+        const quantidade = parseInt(document.getElementById('quantidade').value);
+        const tamanho = parseFloat(document.querySelector('input[name="tamanho"]:checked').value);
+        const adicionais = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+                              .reduce((sum, el) => sum + parseFloat(el.value), 0);
+        
+        if (!produto) {
+            showToast('Selecione um item do cardápio!', 'error');
+            return;
+        }
+
+        const precoBase = cardapio[produto];
+        const totalItem = (precoBase + tamanho + adicionais) * quantidade;
+
+        addItemToOrder({
+            nome: produto,
+            quantidade,
+            total: totalItem
+        });
+
+        this.reset();
+        showToast('Item adicionado ao pedido!');
+    });
+
+    // Manipulador do modal
+    document.getElementById('pedidoForm').addEventListener('submit', function(e) {
+        const modalDetails = document.getElementById('modalPedidoDetails');
+        modalDetails.innerHTML = pedido.items.map(item => `
+            <tr>
+                <td><strong>${item.nome}</strong></td>
+                <td class="text-end">${item.quantidade}x</td>
+                <td class="text-end">$${item.total.toFixed(2)}</td>
+            </tr>
+        `).join('');
+        
+        new bootstrap.Modal(document.getElementById('confirmacaoModal')).show();
+    });
+</script>
+</body>
+</html>
