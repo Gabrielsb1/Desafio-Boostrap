@@ -17,9 +17,7 @@ Este projeto consiste em uma página web estilizada com Bootstrap, contendo dive
 ## 🖼️ Captura de Tela
 Adicione uma imagem do projeto aqui:
 
-```md
 ![Screenshot do Projeto](projeto.png)
-```
 
 ## 🚀 Tecnologias Utilizadas
 - **HTML5**
@@ -32,9 +30,6 @@ git clone https://github.com/seu-usuario/nome-do-repositorio.git
 cd nome-do-repositorio
 start index.html
 ```
-
-## 📜 Licença
-Este projeto está sob a licença MIT - veja o arquivo [LICENSE](LICENSE) para mais detalhes.
 
 ---
 Desenvolvido por [Gabrielsb1] 😊
